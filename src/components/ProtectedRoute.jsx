@@ -1,34 +1,18 @@
-import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 
 import LoadingSpinner from "./LoadingSpinner";
-import { getAdminStatus } from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
+// Wraps the admin pages. Anyone who is not a signed-in admin
+// is sent to the login page.
 function ProtectedRoute({ children }) {
-  const [status, setStatus] = useState("checking");
+  const { loading, profile } = useAuth();
 
-  useEffect(() => {
-    let active = true;
-
-    getAdminStatus()
-      .then((isAdmin) => {
-        if (active) setStatus(isAdmin ? "allowed" : "denied");
-      })
-      .catch((err) => {
-        console.error("Failed to check admin access:", err);
-        if (active) setStatus("denied");
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (status === "checking") {
-    return <LoadingSpinner />;
+  if (loading) {
+    return <LoadingSpinner fullPage />;
   }
 
-  if (status === "denied") {
+  if (profile?.role !== "admin") {
     return <Navigate to="/login" replace />;
   }
 

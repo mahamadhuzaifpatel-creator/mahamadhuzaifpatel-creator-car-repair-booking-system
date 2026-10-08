@@ -1,146 +1,116 @@
-import LogoutButton from "../../components/LogoutButton";
-import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import "./Dashboard.css";
-import "./AdminTable.css";
 
+import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
+import StatusBadge from "../../components/StatusBadge";
+import EmptyState from "../../components/EmptyState";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorMessage from "../../components/ErrorMessage";
 
-import {
-  getAdminStats,
-  getRecentBookings,
-} from "../../services/adminService";
+import { useAsync } from "../../hooks/useAsync";
+import { getAdminStats, getRecentBookings } from "../../services/adminService";
 import { formatDate } from "../../lib/format";
 
+async function loadDashboard() {
+  const [stats, recentBookings] = await Promise.all([
+    getAdminStats(),
+    getRecentBookings(5),
+  ]);
+
+  return { stats, recentBookings };
+}
+
 function Dashboard() {
-  const [stats, setStats] = useState({
-    customers: 0,
-    vehicles: 0,
-    serviceCenters: 0,
-    bookings: 0,
-  });
-  const [recentBookings, setRecentBookings] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    async function loadDashboard() {
-      try {
-        const [statsData, bookingsData] = await Promise.all([
-          getAdminStats(),
-          getRecentBookings(5),
-        ]);
-
-        setStats(statsData);
-        setRecentBookings(bookingsData);
-      } catch (err) {
-        console.error("Failed to load dashboard:", err);
-        setError(err.message || "Unable to load dashboard.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadDashboard();
-  }, []);
+  const { data, loading, error, reload } = useAsync(loadDashboard);
 
   return (
-    <div className="admin-page">
-      <header className="admin-header">
-        <div>
-          <p className="admin-label">CAR REPAIR BOOKING SYSTEM</p>
+    <div>
+      <PageHeader
+        label="Car Repair Booking System"
+        title="Admin Dashboard"
+        subtitle="Monitor customers, vehicles, service centers and bookings."
+      />
 
-          <h1>Admin Dashboard</h1>
-
-          <p className="admin-subtitle">
-            Monitor customers, vehicles, service centers and bookings.
-          </p>
-        </div>
-
-        <LogoutButton />
-      </header>
-
-      <main className="admin-content">
+      <main className="page-content">
         {loading && <LoadingSpinner />}
 
-        {!loading && error && <ErrorMessage message={error} />}
+        {!loading && error && <ErrorMessage message={error} onRetry={reload} />}
 
-        {!loading && !error && (
+        {!loading && !error && data && (
           <>
             <section className="stats-grid">
               <StatCard
                 title="Total Customers"
-                value={stats.customers}
-                description="Registered customers"
+                value={data.stats.customers}
+                description="Customers who have booked"
               />
 
               <StatCard
                 title="Total Vehicles"
-                value={stats.vehicles}
-                description="Registered vehicles"
+                value={data.stats.vehicles}
+                description="Vehicles on record"
               />
 
               <StatCard
                 title="Service Centers"
-                value={stats.serviceCenters}
+                value={data.stats.serviceCenters}
                 description="Available service centers"
               />
 
               <StatCard
                 title="Total Bookings"
-                value={stats.bookings}
+                value={data.stats.bookings}
                 description="All booking records"
               />
             </section>
 
-            <section className="dashboard-section">
-              <div className="section-header">
+            <section className="section-card">
+              <div className="section-header dashboard-section-header">
                 <div>
                   <h2>Recent Bookings</h2>
 
                   <p>Latest booking activity in the system.</p>
                 </div>
+
+                {data.recentBookings.length > 0 && (
+                  <Link to="/admin/bookings" className="secondary-btn">
+                    View all
+                  </Link>
+                )}
               </div>
 
-              {recentBookings.length === 0 ? (
-                <div className="empty-state">
-                  <h3>No recent bookings</h3>
-
-                  <p>
-                    Recent customer bookings will appear here once
-                    bookings are created.
-                  </p>
-                </div>
+              {data.recentBookings.length === 0 ? (
+                <EmptyState
+                  title="No recent bookings"
+                  message="Recent customer bookings will appear here once bookings are created."
+                />
               ) : (
                 <div className="table-wrapper">
-                  <table className="admin-table">
+                  <table className="data-table">
                     <thead>
                       <tr>
                         <th>ID</th>
                         <th>Customer</th>
                         <th>Service Center</th>
+                        <th>Service</th>
                         <th>Date</th>
                         <th>Status</th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      {recentBookings.map((booking) => (
+                      {data.recentBookings.map((booking) => (
                         <tr key={booking.id}>
                           <td>#{booking.id}</td>
-                          <td>{booking.customer?.full_name ?? "—"}</td>
+                          <td>{booking.customer?.full_name || "—"}</td>
                           <td>{booking.service_center?.name ?? "—"}</td>
-                          <td>{formatDate(booking.booking_date)}</td>
+                          <td>{booking.service?.name ?? "—"}</td>
+                          <td className="nowrap">
+                            {formatDate(booking.booking_date)}
+                          </td>
                           <td>
-                            <span
-                              className={`status-badge status-${(
-                                booking.status ?? "unknown"
-                              ).toLowerCase()}`}
-                            >
-                              {booking.status ?? "—"}
-                            </span>
+                            <StatusBadge status={booking.status} />
                           </td>
                         </tr>
                       ))}

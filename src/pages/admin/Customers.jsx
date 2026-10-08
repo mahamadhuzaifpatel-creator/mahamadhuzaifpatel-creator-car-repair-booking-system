@@ -1,88 +1,56 @@
-import { useEffect, useState } from "react";
-import "./AdminTable.css";
-
+import PageHeader from "../../components/PageHeader";
 import EmptyState from "../../components/EmptyState";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import ErrorMessage from "../../components/ErrorMessage";
 
+import { useAsync } from "../../hooks/useAsync";
 import { getCustomers } from "../../services/adminService";
-
-function formatDate(value) {
-  if (!value) return "—";
-
-  return new Date(value).toLocaleDateString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
+import { formatDate } from "../../lib/format";
 
 function Customers() {
-  const [customers, setCustomers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    async function loadCustomers() {
-      try {
-        const data = await getCustomers();
-        setCustomers(data);
-      } catch (err) {
-        console.error("Failed to load customers:", err);
-        setError(err.message || "Unable to load customers.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadCustomers();
-  }, []);
+  const { data: customers, loading, error, reload } = useAsync(getCustomers);
 
   return (
-    <div className="admin-page">
-      <header className="admin-header">
-        <div>
-          <p className="admin-label">ADMIN MANAGEMENT</p>
+    <div>
+      <PageHeader
+        label="Admin Management"
+        title="Customers"
+        subtitle="Everyone who has made a booking."
+      />
 
-          <h1>Customers</h1>
-
-          <p className="admin-subtitle">
-            View and manage registered customers.
-          </p>
-        </div>
-      </header>
-
-      <main className="admin-content">
+      <main className="page-content">
         {loading && <LoadingSpinner />}
 
-        {!loading && error && <ErrorMessage message={error} />}
+        {!loading && error && <ErrorMessage message={error} onRetry={reload} />}
 
-        {!loading && !error && (
-          <div className="dashboard-section">
+        {!loading && !error && customers && (
+          <div className="section-card">
             {customers.length === 0 ? (
               <EmptyState
                 title="No customers found"
-                message="Customers will appear here once they register."
+                message="Customers will appear here after they make their first booking."
               />
             ) : (
               <div className="table-wrapper">
-                <table className="admin-table">
+                <table className="data-table">
                   <thead>
                     <tr>
                       <th>Name</th>
-                      <th>Email</th>
                       <th>Phone</th>
-                      <th>Joined</th>
+                      <th>Email</th>
+                      <th>First booking</th>
                     </tr>
                   </thead>
 
                   <tbody>
                     {customers.map((customer) => (
                       <tr key={customer.id}>
-                        <td>{customer.full_name ?? customer.name ?? "—"}</td>
-                        <td>{customer.email ?? "—"}</td>
-                        <td>{customer.phone ?? customer.phone_number ?? "—"}</td>
-                        <td>{formatDate(customer.created_at)}</td>
+                        <td>{customer.full_name || "—"}</td>
+                        <td className="nowrap">{customer.phone || "—"}</td>
+                        <td>{customer.email || "—"}</td>
+                        <td className="nowrap">
+                          {formatDate(customer.created_at)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

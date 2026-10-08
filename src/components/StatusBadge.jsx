@@ -1,15 +1,13 @@
 import "./StatusBadge.css";
 
+// A coloured pill for a booking status: pending, confirmed, completed, cancelled.
 function StatusBadge({ status }) {
-  const formattedStatus = status
-    ? status.replace(/_/g, " ")
-    : "Unknown";
+  const value = (status ?? "unknown").toLowerCase();
+  const className = value.replace(/[^a-z]+/g, "-");
 
   return (
-    <span
-      className={`status-badge status-${status?.toLowerCase()}`}
-    >
-      {formattedStatus}
+    <span className={`status-badge status-${className}`}>
+      {value.replace(/_/g, " ")}
     </span>
   );
 }

@@ -1,10 +1,13 @@
 import "./LoadingSpinner.css";
 
-function LoadingSpinner() {
+function LoadingSpinner({ fullPage = false, label = "Loading..." }) {
   return (
-    <div className="loading-container">
-      <div className="loading-spinner"></div>
-      <p>Loading...</p>
+    <div
+      className={fullPage ? "spinner-wrap spinner-full" : "spinner-wrap"}
+      role="status"
+    >
+      <span className="spinner" aria-hidden="true" />
+      <span className="spinner-label">{label}</span>
     </div>
   );
 }

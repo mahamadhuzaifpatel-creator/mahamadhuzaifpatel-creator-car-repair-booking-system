@@ -1,0 +1,20 @@
+.public-layout {
+  min-height: 100vh;
+}
+
+.public-body {
+  max-width: 920px;
+  margin: 0 auto;
+  padding-bottom: 48px;
+}
+
+/* On the public pages the page header sits on the grey background. */
+.public-body .page-header {
+  padding: 32px 24px 0;
+  border-bottom: none;
+  background: transparent;
+}
+
+.public-body .page-content {
+  padding: 24px;
+}

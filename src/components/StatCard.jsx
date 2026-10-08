@@ -3,17 +3,11 @@ import "./StatCard.css";
 function StatCard({ title, value, description }) {
   return (
     <div className="stat-card">
-      <span className="stat-card-title">{title}</span>
+      <p className="stat-title">{title}</p>
 
-      <strong className="stat-card-value">
-        {value}
-      </strong>
+      <p className="stat-value">{value}</p>
 
-      {description && (
-        <span className="stat-card-description">
-          {description}
-        </span>
-      )}
+      <p className="stat-description">{description}</p>
     </div>
   );
 }

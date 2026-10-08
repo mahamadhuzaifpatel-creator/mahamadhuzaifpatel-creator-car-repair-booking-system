@@ -1,16 +1,23 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import "./Login.css";
+import { Link, Navigate } from "react-router-dom";
+import "./Auth.css";
 
+import { useAuth } from "../context/AuthContext";
 import { signInAdmin } from "../services/authService";
 
+// Admin sign-in. Customers never need to sign in.
 function Login() {
-  const navigate = useNavigate();
+  const { loading, profile } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  // Already signed in (or just signed in) as an admin: open the admin panel.
+  if (!loading && profile?.role === "admin") {
+    return <Navigate to="/admin" replace />;
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -19,8 +26,9 @@ function Login() {
     setSubmitting(true);
 
     try {
-      await signInAdmin(email, password);
-      navigate("/admin", { replace: true });
+      await signInAdmin(email.trim(), password);
+      // No navigate() here: once the sign-in is picked up by AuthContext,
+      // the check above redirects automatically.
     } catch (err) {
       console.error("Failed to sign in:", err);
       setError(err.message || "Unable to sign in.");
@@ -29,41 +37,49 @@ function Login() {
   }
 
   return (
-    <div className="login-page">
-      <form className="login-card" onSubmit={handleSubmit}>
-        <p className="login-label">CARCARE ADMIN PANEL</p>
+    <div className="auth-page">
+      <form className="auth-card" onSubmit={handleSubmit}>
+        <p className="auth-label">CARCARE ADMIN PANEL</p>
 
-        <h1>Sign in</h1>
+        <h1>Admin sign in</h1>
 
-        <p className="login-subtitle">
-          Use your admin account to continue.
+        <p className="auth-subtitle">
+          Use your admin account to manage centers, services and bookings.
         </p>
 
-        {error && <p className="login-error">{error}</p>}
+        {error && <p className="form-error">{error}</p>}
 
-        <label htmlFor="email">Email</label>
-        <input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          autoComplete="email"
-          required
-        />
+        <div className="form-field">
+          <label htmlFor="login-email">Email</label>
+          <input
+            id="login-email"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
+            required
+          />
+        </div>
 
-        <label htmlFor="password">Password</label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(event) => setPassword(event.target.value)}
-          autoComplete="current-password"
-          required
-        />
+        <div className="form-field">
+          <label htmlFor="login-password">Password</label>
+          <input
+            id="login-password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            required
+          />
+        </div>
 
-        <button type="submit" disabled={submitting}>
+        <button type="submit" className="primary-btn" disabled={submitting}>
           {submitting ? "Signing in..." : "Sign in"}
         </button>
+
+        <p className="auth-footer">
+          Here to book a repair? <Link to="/book">Book without signing in</Link>
+        </p>
       </form>
     </div>
   );

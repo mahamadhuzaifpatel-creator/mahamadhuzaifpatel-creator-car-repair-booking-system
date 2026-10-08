@@ -1,19 +1,15 @@
 .dashboard-layout {
+  display: flex;
   min-height: 100vh;
-  background: #f5f7fb;
 }
 
 .dashboard-main {
-  margin-left: 250px;
-  min-height: 100vh;
+  flex: 1;
+  min-width: 0;
 }
 
-@media (max-width: 700px) {
-  .admin-sidebar {
-    width: 210px;
-  }
-
-  .dashboard-main {
-    margin-left: 210px;
+@media (max-width: 860px) {
+  .dashboard-layout {
+    flex-direction: column;
   }
 }

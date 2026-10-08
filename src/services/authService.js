@@ -1,9 +1,11 @@
 import { supabase } from "../lib/supabase";
 
-async function checkIsAdmin(userId) {
+// Only the admin has a login. Customers book without an account.
+
+export async function getProfile(userId) {
   const { data, error } = await supabase
     .from("profiles")
-    .select("role")
+    .select("id, full_name, email, phone, role")
     .eq("id", userId)
     .maybeSingle();
 
@@ -11,7 +13,7 @@ async function checkIsAdmin(userId) {
     throw error;
   }
 
-  return data?.role === "admin";
+  return data;
 }
 
 export async function signInAdmin(email, password) {
@@ -24,29 +26,12 @@ export async function signInAdmin(email, password) {
     throw error;
   }
 
-  const isAdmin = await checkIsAdmin(data.user.id);
+  const profile = await getProfile(data.user.id);
 
-  if (!isAdmin) {
+  if (profile?.role !== "admin") {
     await supabase.auth.signOut();
     throw new Error("This account does not have admin access.");
   }
-}
-
-export async function getAdminStatus() {
-  const {
-    data: { session },
-    error,
-  } = await supabase.auth.getSession();
-
-  if (error) {
-    throw error;
-  }
-
-  if (!session) {
-    return false;
-  }
-
-  return checkIsAdmin(session.user.id);
 }
 
 export async function signOut() {

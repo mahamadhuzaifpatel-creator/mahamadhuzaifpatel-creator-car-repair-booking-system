@@ -1,13 +1,17 @@
 import "./ErrorMessage.css";
 
-function ErrorMessage({ message }) {
+function ErrorMessage({ title = "Something went wrong", message, onRetry }) {
   return (
-    <div className="error-message">
-      <strong>Something went wrong</strong>
+    <div className="error-box" role="alert">
+      <h3>{title}</h3>
 
-      <p>
-        {message || "Unable to load the requested data."}
-      </p>
+      {message && <p>{message}</p>}
+
+      {onRetry && (
+        <button type="button" className="secondary-btn" onClick={onRetry}>
+          Try again
+        </button>
+      )}
     </div>
   );
 }

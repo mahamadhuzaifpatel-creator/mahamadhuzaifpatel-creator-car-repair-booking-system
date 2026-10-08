@@ -1,32 +1,32 @@
-.reusable-empty-state {
-  padding: 50px 20px;
+.empty-state {
+  padding: 56px 24px;
+  border-radius: 12px;
   text-align: center;
-  background: #f9fafb;
-  border-radius: 10px;
+  background: #f8fafc;
 }
 
-.empty-icon {
-  width: 42px;
-  height: 42px;
-  margin: 0 auto 14px;
-  border-radius: 50%;
-  background: #e5e7eb;
-  color: #6b7280;
+.empty-state-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-}
-
-.reusable-empty-state h3 {
-  color: #374151;
-  margin-bottom: 8px;
-}
-
-.reusable-empty-state p {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
   color: #6b7280;
-  font-size: 14px;
-  max-width: 500px;
-  margin: 0 auto;
-  line-height: 1.6;
+  background: #e5e7eb;
+}
+
+.empty-state h3 {
+  font-size: 1.3rem;
+  color: #1f2937;
+}
+
+.empty-state p {
+  margin-top: 10px;
+  color: #6b7280;
+}
+
+.empty-state-action {
+  margin-top: 20px;
 }

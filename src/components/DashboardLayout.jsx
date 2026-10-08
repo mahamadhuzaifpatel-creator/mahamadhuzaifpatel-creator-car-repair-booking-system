@@ -1,15 +1,17 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
 import "./DashboardLayout.css";
 
+import Sidebar from "./Sidebar";
+
+// The frame around every admin page: sidebar on the left, page on the right.
 function DashboardLayout() {
   return (
     <div className="dashboard-layout">
       <Sidebar />
 
-      <main className="dashboard-main">
+      <div className="dashboard-main">
         <Outlet />
-      </main>
+      </div>
     </div>
   );
 }
