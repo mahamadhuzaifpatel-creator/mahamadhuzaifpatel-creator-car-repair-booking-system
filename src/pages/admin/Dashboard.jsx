@@ -1,17 +1,63 @@
+import { useEffect, useState } from "react";
 import "./Dashboard.css";
+
 import StatCard from "../../components/StatCard";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import ErrorMessage from "../../components/ErrorMessage";
+
+import { getAdminStats } from "../../services/adminService";
 
 function Dashboard() {
+  const [stats, setStats] = useState({
+    customers: 0,
+    vehicles: 0,
+    serviceCenters: 0,
+    bookings: 0,
+  });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getAdminStats();
+
+        setStats(data);
+      } catch (err) {
+        console.error(
+          "Failed to load admin statistics:",
+          err
+        );
+
+        setError(
+          err.message ||
+            "Unable to load dashboard statistics."
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadStats();
+  }, []);
+
   return (
     <div className="admin-page">
       <header className="admin-header">
         <div>
-          <p className="admin-label">CAR REPAIR BOOKING SYSTEM</p>
+          <p className="admin-label">
+            CAR REPAIR BOOKING SYSTEM
+          </p>
 
           <h1>Admin Dashboard</h1>
 
           <p className="admin-subtitle">
-            Monitor customers, vehicles, service centers and bookings.
+            Monitor customers, vehicles, service centers
+            and bookings.
           </p>
         </div>
 
@@ -21,56 +67,69 @@ function Dashboard() {
       </header>
 
       <main className="admin-content">
-        <section className="stats-grid">
 
-          <StatCard
-            title="Total Customers"
-            value="0"
-            description="Registered customers"
-          />
+        {loading && <LoadingSpinner />}
 
-          <StatCard
-            title="Total Vehicles"
-            value="0"
-            description="Registered vehicles"
-          />
+        {!loading && error && (
+          <ErrorMessage message={error} />
+        )}
 
-          <StatCard
-            title="Service Centers"
-            value="0"
-            description="Available service centers"
-          />
+        {!loading && !error && (
+          <>
+            <section className="stats-grid">
 
-          <StatCard
-            title="Total Bookings"
-            value="0"
-            description="All booking records"
-          />
+              <StatCard
+                title="Total Customers"
+                value={stats.customers}
+                description="Registered customers"
+              />
 
-        </section>
+              <StatCard
+                title="Total Vehicles"
+                value={stats.vehicles}
+                description="Registered vehicles"
+              />
 
-        <section className="dashboard-section">
+              <StatCard
+                title="Service Centers"
+                value={stats.serviceCenters}
+                description="Available service centers"
+              />
 
-          <div className="section-header">
-            <div>
-              <h2>Recent Bookings</h2>
+              <StatCard
+                title="Total Bookings"
+                value={stats.bookings}
+                description="All booking records"
+              />
 
-              <p>
-                Latest booking activity in the system.
-              </p>
-            </div>
-          </div>
+            </section>
 
-          <div className="empty-state">
-            <h3>No bookings yet</h3>
+            <section className="dashboard-section">
 
-            <p>
-              Recent customer bookings will appear here
-              once the booking module is connected.
-            </p>
-          </div>
+              <div className="section-header">
+                <div>
+                  <h2>Recent Bookings</h2>
 
-        </section>
+                  <p>
+                    Latest booking activity in the
+                    system.
+                  </p>
+                </div>
+              </div>
+
+              <div className="empty-state">
+                <h3>No recent bookings</h3>
+
+                <p>
+                  Recent customer bookings will appear
+                  here once bookings are created.
+                </p>
+              </div>
+
+            </section>
+          </>
+        )}
+
       </main>
     </div>
   );
