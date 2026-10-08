@@ -93,3 +93,24 @@ export async function getBookings() {
 
   return data ?? [];
 }
+export async function getRecentBookings(limit = 5) {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(
+      `
+      id,
+      booking_date,
+      status,
+      customer:profiles!customer_id ( full_name ),
+      service_center:service_centers!service_center_id ( name )
+    `
+    )
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
+}
