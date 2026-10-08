@@ -1,0 +1,19 @@
+.dashboard-layout {
+  min-height: 100vh;
+  background: #f5f7fb;
+}
+
+.dashboard-main {
+  margin-left: 250px;
+  min-height: 100vh;
+}
+
+@media (max-width: 700px) {
+  .admin-sidebar {
+    width: 210px;
+  }
+
+  .dashboard-main {
+    margin-left: 210px;
+  }
+}
