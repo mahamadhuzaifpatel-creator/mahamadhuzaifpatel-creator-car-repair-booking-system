@@ -43,3 +43,53 @@ export async function getAdminStats() {
     bookings: bookingsResult.count ?? 0,
   };
 }
+export async function getCustomers() {
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("role", "customer");
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
+}
+export async function getServiceCenters() {
+  const { data, error } = await supabase
+    .from("service_centers")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
+}
+
+export async function getBookings() {
+  const { data, error } = await supabase
+    .from("bookings")
+    .select(
+      `
+      id,
+      booking_date,
+      booking_time,
+      status,
+      estimated_cost,
+      final_cost,
+      created_at,
+      customer:profiles!customer_id ( full_name, email ),
+      vehicle:vehicles!vehicle_id ( registration_number, brand, model ),
+      service_center:service_centers!service_center_id ( name )
+    `
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data ?? [];
+}
