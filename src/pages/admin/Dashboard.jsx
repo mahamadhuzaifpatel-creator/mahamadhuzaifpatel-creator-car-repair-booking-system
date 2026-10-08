@@ -1,3 +1,4 @@
+import LogoutButton from "../../components/LogoutButton";
 import { useEffect, useState } from "react";
 import "./Dashboard.css";
 import "./AdminTable.css";
@@ -58,7 +59,7 @@ function Dashboard() {
           </p>
         </div>
 
-        <button className="logout-btn">Logout</button>
+        <LogoutButton />
       </header>
 
       <main className="admin-content">
